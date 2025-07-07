@@ -429,7 +429,7 @@ Power up our Windows 10 machine and search for **PC > Properties > Advanced syst
 
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/82.jpg)
 
-Under the "Computer Name" tab, click "Change" and select "Member of Domain", and write our domain name "adlab.local".
+Under the "Computer Name" tab, click "Change" and select "Member of Domain", and write our domain name "thh.local".
 
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/83.jpg)
 
@@ -535,7 +535,7 @@ Now on the left side, we have interesting fields. And if we look at "# EventCode
 
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/100.jpg)
 
-So this means that there were 20 failed attempts to log in to Adam's account, which is correct because if you recall, there was a total of 21 passwords in the "passwords.txt" file, of which 20 were incorrect.
+So this means that there were 20 failed attempts to log in to Terry's account, which is correct because if you recall, there was a total of 21 passwords in the "passwords.txt" file, of which 20 were incorrect.
 Let's filter down the EventCode 4625 by clicking on it.
 
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/101.jpg)
@@ -608,7 +608,7 @@ Run the search with `index=endpoint powershell`, and we see that 523 events occu
 
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/113.jpg)
 
-We actually see that this event indicates that the PowerShell executable (`powershell.exe`) running under the `ADLAB\Administrator` account modified a registry value. Specifically, the registry key `HKLM\System\CurrentControlSet\Services\bam\State\UserSettings` was altered. The `bam` registry key typically relates to the Background Activity Moderator, which Windows uses to manage app background activity.
+We actually see that this event indicates that the PowerShell executable (`powershell.exe`) running under the `THH\Administrator` account modified a registry value. Specifically, the registry key `HKLM\System\CurrentControlSet\Services\bam\State\UserSettings` was altered. The `bam` registry key typically relates to the Background Activity Moderator, which Windows uses to manage app background activity.
 
 The event captured shows the simulated attack test (T1059.001) modifying a registry value using PowerShell. It indicates that our Sysmon configuration is capturing relevant events, which is crucial for detecting and responding to such activities. Review the surrounding events for a complete picture and ensure your detection mechanisms in Splunk are tuned to catch and alert on such activities.
 
