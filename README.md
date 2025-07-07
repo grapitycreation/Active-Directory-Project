@@ -151,6 +151,131 @@ First, let's start with renaming our PC to Target-PC.
 Now let's open a browser window and try to connect to our Splunk server. Our Splunk IP address was 192.168.193.157, and we know that Splunk listens to port 8000:
 ![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/43.jpg)
 
+And as you can see, we can connect to its login page with no problem. Now let's install the Splunk Universal Forwarder on this machine so we can forward our logs to the Splunk server. Go to the Splunk website and log in with the account that you created. And download the Universal Forwarder for Windows.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/44.jpg)
+
+After the download is complete, start the setup.
+
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/45.jpg)
+
+On the next page, for the username, you can put anything you like. I will put "Admin" and clicked the "Generate random password". On the next page, for the deployment server, just skip without entering anything because we don't have one.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/46.jpg)
+
+On the next page, which is the Indexer page, here we will enter our Splunk server's IP and put the port as 9997, which is the default port for the Splunk indexer. Then click "Next" and start the installation.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/47.jpg)
+
+Meanwhile, we want to start downloading Sysmon, so go to the [Sysmon - Sysinternals | Microsoft Learn](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) and download Sysmon. The Sysmon configuration that we will be using is Olaf. So go to the [GitHub - olafhartong/sysmon-modular: A repository of sysmon configuration modules](https://github.com/olafhartong/sysmon-modular)
+and download the `sysmonconfig.xml` file to the target machine.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/48.jpg)
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/49.jpg)
+
+You can click "Raw" and right-click "Save as" and download the file. Next, go to the downloads directory and extract Sysmon from the zip file.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/50.jpg)
+
+Open up a PowerShell in administrator mode and go to the location of this directory. You can copy the location from the menu bar and paste it into the PowerShell with the `cd` command.
+To install Sysmon, run the command `.\Sysmon64.exe -i` with a configuration file. And since the config file that we installed is in the downloads folder, we can run this command:
+`.\Sysmon64.exe -i ..\sysmonconfig.xml`
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/51.jpg)
+
+And Sysmon will be installed shortly. And meanwhile, our Splunk Universal Forwarder is also installed.
+
+Now is the most important part. We need to instruct our Splunk Forwarder on what we want to send over to our Splunk server. To do this, we must configure a file called `input.conf`. This file is located at
+`C:\Program Files\SplunkUniversalForwarder\etc\system\default`
+
+**But we will not edit the `input.conf` file under the default directory because the configs in this directory are there just in case we mess anything up, so we will create a new file under the local directory.**
+
+Now, to be able to create a new file in the local directory, we need to be an administrator. So to do this, we will search for Notepad from the search bar and open it as an administrator.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/52.jpg)
+
+Now, this is the content from the `input.conf` file that I copied here:
+
+```
+[WinEventLog://Application]
+index = endpoint
+disabled = false
+
+[WinEventLog://Security]
+index = endpoint
+disabled = false
+
+[WinEventLog://System]
+index = endpoint
+disabled = false
+
+[WinEventLog://Microsoft-Windows-Sysmon/Operational]
+index = endpoint
+disabled = false
+renderXml = true
+source = XmlWinEventLog:Microsoft-Windows-Sysmon/Operational
+```
+
+You can copy and paste this into the new Notepad that you opened. This is instructing our Splunk Forwarder to push events related to the application, security, system, and also Sysmon to our Splunk server.
+
+Important note: See that the index that we are pointing to is `index = endpoint`. This is important because whatever events fall under these categories will be sent over to Splunk and placed under the index "endpoint". If our Splunk server does not have an index named "endpoint", it will not receive any of these events.
+
+After filling in the config file, save it under the local directory as we mentioned before as `inputs.conf`.
+`C:\Program Files\SplunkUniversalForwarder\etc\system\local`
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/53.jpg)
+
+Another important note: If we see that the "Log on as" line is "NT SERVICE" and double-click it, and look at the "Log On" tab from the menu
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/54.jpg)
+
+If you see that it is using "This account" and it is "NT SERVICE\SplunkForwarder", it might not be able to collect some of the logs due to some of the permissions. So you want to select "Local System account" and hit "Apply".
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/55.jpg)
+
+Which then will ask us to stop and restart the service, and we will do so. Just double-check on the Services menu that SplunkForwarder is "Log on as" Local System and also that Sysmon64 is running.
+
+After finishing these steps, we can finalize our Splunk server configuration. Head over to
+http://192.168.193.157:8000/ and log in with the credentials that we set during the Splunk server installation.
+
+On the menu, we want to go to the **Indexes** from the **Settings** menu. Now recall that our index name was "endpoint" from the Splunk Universal Forwarder `inputs.conf` file. We now will create this index. Just click on the "New Index" button from the top right and enter the name "endpoint" and save.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/56.jpg)
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/57.jpg)
+
+Now you will be able to see the "endpoint" index on the list.
+Next, we need to make sure that we enable our Splunk server to receive the data. In order to do that, go to **Settings > Forwarding and receiving** and under the "Receive data", click on the **Configure receiving** button, and there click on the **New Receiving Port** on the top right, and recall that during the setup, we mentioned that the default port is 9997, enter it and hit save.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/58.jpg)
+
+Now at this point, if we set up everything correctly, we should start seeing data coming in from our target machine. Click on the **Apps** from the top left corner, and select **Search & Reporting**.
+And here on the search bar, write `index="endpoint"` and click enter.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/59.jpg)
+
+And we do see some events, and if we scroll down a little bit and see the "host" field from the left, we see that it is **TARGET-PC**. We also see some sources and sourcetypes, which is exactly what we entered in our `input.conf` file on the Target-PC.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/60.jpg)
+
+Now it is time to do this same setup on our Active Directory (Windows Server). Also, change the name of the Windows Server machine to ADDC01.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/61.jpg)
+
+Other than that, everything is the same as with the Target-PC, so I will not show this part here.
+And after if everything is successful, you should be seeing 2 hosts like this when you search for `index=endpoint`.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/62.jpg)
+
+## Install and Configure Active Directory
+
+Now it is time to configure our Active Directory and then promote it to a Domain Controller. And then we will be configuring the target machine to join this domain.
+Double-check the IP address of the Windows Server, and then open **Server Manager** and on the top right go to **Manager > Add Roles and Features**.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/63.jpg)
+
+Click "Next" and on the next page, select "Role-based or feature-based installation".
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/64.jpg)
+
+Next, you will select the server from the list, since we only have one server, there will be only one on the list, and we select and go "Next".
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/65.jpg)
+
+On the next page, we will set the Server Roles. Here we want to select the **Active Directory Domain Services**. Click on the "Add Features" on the pop-up page and go "Next".
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/66.jpg)
+
+From this point, click on "Next" until you get to the "Install" step, and start installing.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/67.jpg)
+
+Click on "Close" when you see this "Installation succeeded" message.
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/68.jpg)
+
+On the top right, click on the Flag with the yellow sign and click on "Promote this server to a domain controller".
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/69.jpg)
+
+
+
 
 
 
