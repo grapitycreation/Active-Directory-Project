@@ -441,30 +441,30 @@ To fix this, go to the network adapter > change adapter options > select the ada
 
 And to check the configuration is set, open a command prompt and run `ipconfig /all`.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/85.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/85.jpg)
 
 Now let's try again to join our domain. And now we are prompted to log in with some credentials.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/86.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/86.jpg)
 
 Log in with the Administrator account and password.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/87.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/87.jpg)
 
 In a real-world environment, you would create users and put them into a custom group that is authorized to allow computers to join the domain.
 
 You will be prompted to restart the computer, and once we are on the log-on screen, we want to log in with the "Jenny Smith" account. In order to do so, we want to click on the "Other user" and make sure that our "Sign in to" is pointing to our domain, and we see that it is "THH", so we are good.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/88.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/88.jpg)
 
 ## Brute Force Attack with Kali Linux
 Check ip address in Kali Linux with command `ip a`
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/89.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/89.jpg)
 
 Also, ping google.com and the IP of the Splunk server to make sure that you have a connection.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/90.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/90.jpg)
 
 Next, before going with any procedure, let's update and upgrade our Kali:
 `sudo apt-get update && sudo apt-get upgrade -y`
@@ -481,34 +481,34 @@ Now that our tool is installed, we can use the popular wordlist called "rockyou.
 Unzip file with `sudo gunzip rockyou.txt.gz`
 And copy the wordlist to "ad-project" directory with `cp rockyou.txt ~/Desktop/ad-project`
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/91.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/91.jpg)
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/92.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/92.jpg)
 
 The wordlist's size is 134MB, which is very big, and for the purpose of this attack, we do not need this many passwords. So let's only get the first 20 lines.
 And if we use this command, it will copy these 20 lines into a new file:
 `head -n 20 rockyou.txt > passwords.txt`
 Now, as an attacker, you would probably do a lot of reconnaissance, probably set up some basic AD attacks, and let's just say in our scenario, we know we want to target a certain password, so that's what we will do with `nano passwords.txt`.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/93.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/93.jpg)
 
 Now before we launch our attack, let's head over to our Windows target machine. On this machine, we want to enable Remote Desktop. And to do that, we want to search for "PC" and then "Properties" > "Advanced system settings". It will ask you for the admin username and password; enter them and continue. (This is the username and password for ADDC.)
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/94.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/94.jpg)
 
 On the opening page, select the "Remote" tab and then pick the **Allow remote connections to this computer** option. And then click on the **Select Users** button.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/95.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/95.jpg)
 
 Search for the names that are members of our AD group.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/96.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/96.jpg)
 
 After selecting them, click "OK" and then "Apply". And now Remote Desktop for our target machine is enabled.
 
 Let's head back to our Kali Linux machine. And to use our tool, we'll just type `crowbar -h` to see the help menu and to see what kind of options are available for us.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/97.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/97.jpg)
 
 The service that we are interested in is RDP; this is why we are using this tool and why we enabled RDP. The command that we will use with crowbar is the following:
 `crowbar -b rdp -u tsmith -C passwords.txt -s 192.168.193.155/32`
@@ -522,34 +522,34 @@ Now to explain this command:
 
 Specifying the subnet mask or CIDR notation, especially in network configurations, helps avoid ambiguity and ensures that the intended network size and address range are clearly understood.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/98.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/98.jpg)
 
 It actually starts and tries every password on the list. And from the result, we can see that we have an RDP success with the username "tsmith" and password "Password1!".
 
 Now let's head over to Splunk and see what telemetry we had generated.
 In Splunk, go to "Search & Reporting". Because we know when the attack occurred, let's filter it out by the last 15 minutes. And also, we know the targeted user was "Terry Smith". By using these, let's narrow down our search.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/99.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/99.jpg)
 
 Now on the left side, we have interesting fields. And if we look at "# EventCode", we see that an event ID of 4625 occurred 20 times. Let's search this event ID to see what that is.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/100.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/100.jpg)
 
 So this means that there were 20 failed attempts to log in to Adam's account, which is correct because if you recall, there was a total of 21 passwords in the "passwords.txt" file, of which 20 were incorrect.
 Let's filter down the EventCode 4625 by clicking on it.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/101.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/101.jpg)
 
 Now when you see the times of these 20 events, you will see that all these events are happening pretty much at the same time, which can be a clear indication of brute force activity.
 Now if we look at the EventCode 4624, you will see only one event.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/102.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/102.jpg)
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/103.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/103.jpg)
 
 Now let's expand the log by clicking on "Show all 70 lines" and scroll down a bit.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/104.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/104.jpg)
 
 We do happen to see our workstation name as "Kali" and the IP address it is trying to log in from, and this does indeed belong to our Kali Linux machine.
 
@@ -560,13 +560,13 @@ Now let's install Atomic Red Team on our target machine and run some tests on it
 Let's open a PowerShell with administrator privileges and then run the following command:
 `Set-ExecutionPolicy Bypass -Scope CurrentUser`, then enter "Y" to confirm.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/105.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/105.jpg)
 
 Now before installing Atomic Red Team on this PC, let's set an exclusion for the entire C drive because Microsoft Defender will detect and remove some of the files of Atomic Red Team.
 Go to Windows Security > Virus & threat protection > Manage Settings > Exclusions.
 Then click on the "Add an exclusion" button > "Folder" and select our C drive.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/106.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/106.jpg)
 
 And you should be able to see "C:/" under the exclusions now. And we can now install Atomic Red Team by using these two commands:
 `IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);`
@@ -574,31 +574,31 @@ and then
 `Install-AtomicRedTeam -getAtomics`
 Enter "Y" when prompted.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/107.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/107.jpg)
 
 After installation, go into the C drive, and inside the "AtomicRedTeam" directory, there is an "atomics" folder. Here we see a bunch of technique IDs, and these map back to the MITRE ATT&CK framework. When we go to [MITRE ATT&CK®](https://attack.mitre.org/), all of these techniques have a unique ID.
 
 Check on the MITRE ATT&CK website, we see that 001 is for Local, 002 is for Domain, and 003 is for Cloud Account.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/108.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/108.jpg)
 
 In this example, let's go ahead and use the first one, T1136.001.
 To do this, we go back to PowerShell and write this command:
 `Invoke-AtomicTest T1136.001`
 and this will automatically generate telemetry based on creating a local account.
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/109.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/109.jpg)
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/110.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/110.jpg)
 
 And now that our command has finished running, we can go and look into Splunk and search specifically for "new local user".
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/111.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/111.jpg)
 
 And we observed 12 raw events related to the activity. This confirms that our monitoring setup is capturing relevant data for this type of attack technique. The detailed logging will help us analyze and improve our detection and response capabilities.
 Let's try another one, "T1059: Command and Scripting Interpreter".
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/112.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/112.jpg)
 
 Let's go with PowerShell, which is T1059.001.
 
@@ -606,7 +606,7 @@ Running this code, Defender catches a couple of things, and let's see what is go
 
 Run the search with `index=endpoint powershell`, and we see that 523 events occurred in the last 15 minutes. And for example, when we check this event:
 
-![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/113.jpg
+![image](https://github.com/grapitycreation/Active-Directory-Project/blob/main/Images/113.jpg)
 
 We actually see that this event indicates that the PowerShell executable (`powershell.exe`) running under the `ADLAB\Administrator` account modified a registry value. Specifically, the registry key `HKLM\System\CurrentControlSet\Services\bam\State\UserSettings` was altered. The `bam` registry key typically relates to the Background Activity Moderator, which Windows uses to manage app background activity.
 
