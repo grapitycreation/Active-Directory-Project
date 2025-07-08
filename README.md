@@ -14,6 +14,7 @@
 5. [Brute Force Attack with Kali Linux](#brute-force-attack-with-kali-linux)
 6. [Testing with Atomic Red Team](#testing-with-atomic-red-team)
 7. [Conclusion](#conclusion)
+8. [Reference](#reference)
 
 ## Introduction
 This project aims to enhance our IT administration knowledge by deploying an Active Directory environment. Additionally, we will configure a Splunk instance to collect event logs from both a Windows Server running Active Directory and a target Windows machine. In the final phase, we will simulate a brute force attack using a Kali Linux machine to analyze the resulting telemetry and leverage Atomic Red Team for supplementary testing.
@@ -622,7 +623,9 @@ Key takeaways:
 - Continuous monitoring, tuning, and improvement of our security controls are necessary to stay ahead of evolving threats.
 By going through this project, we have gained hands-on experience in setting up and securing an Active Directory environment, as well as leveraging Splunk for security monitoring. This knowledge will be valuable in real-world scenarios where securing and monitoring Windows environments is critical.
 
-
+## Reference
+**Youtube Channel: MYDFIR**
+[Link](https://www.youtube.com/watch?v=Lb_ukgtYK_U&list=PLG6KGSNK4PuBWmX9NykU0wnWamjxdKhDJ&index=5)
 
 
 
